@@ -1,0 +1,146 @@
+<!doctype html> <title> Toward The South Plains Sound Map Example </title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.css" />
+
+<style>
+  body { font: .92em sans-serif; color: #333; background: #fefefe; max-width: 80em; margin: 0 auto; }
+  h1, h2 { font-weight: normal; margin: 0.6em 0; }
+  .leaflet-popup-content { margin: 9px; }
+  .leaflet-popup-content-wrapper { border-radius: 6px; }
+  #mapid { height: 350px; }
+</style>
+
+
+<h1> Toward The South Plains Sound Map </h1>
+
+<p id="mapid"></p>
+
+
+<script type="application/geo+json" id="geo-data">
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Kelso Dunes",
+        "description": "Mojave National Preserve",
+        "audio_url": "https://ttsp-soundmap.s3-us-west-1.amazonaws.com/TTSP_03FR_Mojave_Kelso+Dunes_10_RX.wav",
+        "credit_url": "https://harlanhodges.com",
+        "marker-symbol": "commercial",
+        "marker-size": "large",
+        "marker-color": "c4ba6a"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ -115.701977, 34.893149 ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Crickets and Thunder",
+        "description": "Palo Duro Canyon",
+        "audio_url": "https://ttsp-soundmap.s3-us-west-1.amazonaws.com/TTSP_PD+Canyon_4_Thunder.WAV",
+        "credit_url": "https://harlanhodges.com"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ -101.646091, 34.934426 ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Waves",
+        "description": "Malibu",
+        "audio_url": "https://ttsp-soundmap.s3-us-west-1.amazonaws.com/Malibu_11.WAV",
+        "credit_url": "https://harlanhodges.com"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ -118.95254, 34.04762 ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Lavender Crickets",
+        "description": "Angeles National Forest",
+        "audio_url": "https://ttsp-soundmap.s3-us-west-1.amazonaws.com/TTSP_ANF_Teepee+1.WAV",
+        "credit_url": "https://harlanhodges.com"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ -118.196448, 34.233915]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Hole In The Wall",
+        "description": "Mojave National Preserve",
+        "audio_url": "https://ttsp-soundmap.s3-us-west-1.amazonaws.com/TTSP_06FR_Mojave_Hole+In+The+Wall_02_RX.wav",
+        "credit_url": "https://harlanhodges.com"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ -115.397134, 35.043893 ]
+      }
+    }
+  ],
+  "x-useful-resources": [
+    "paris:  -2.3732829, 48.8453195"
+  ]
+}
+</script>
+
+
+<script type="text/html" id="popup-template">
+<div class="audio-popup">
+    <h2><%= title %></h2>
+    <span><%= description %></span>
+    <audio src="<%= audio_url %>" controls ></audio>
+</div>
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/lodash/4.16.2/lodash.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
+
+
+<script>
+(function (W) {
+  'use strict';
+  var JSON = W.JSON  // Derive "globals".
+    , L = W.L  // Leaflet
+    , _ = W._  // Lodash
+    ;
+  var zoom = 1  //Was: 13,
+    , mymap = L.map('mapid').setView([ 51.505, -0.09 ], zoom)
+    , popup_template = _.template(elementText('#popup-template'))
+    , geo_data = JSON.parse(elementText('#geo-data'))
+    ;
+  L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/dark-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
+  //L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+    maxZoom: 18,  //Was: 18,
+    minZoom: 1,
+    // Not needed! //id: 'your.mapbox.project.id',
+    accessToken: 'pk.eyJ1IjoiaGhvZGdlcyIsImEiOiJjazJheGNiYTMybXowM21waGp2NGRvaWw0In0.8b_34_A1cjY5XBqG4e9O7Q'
+  }).addTo(mymap);
+  W.console.info(geo_data);
+  L.geoJson(geo_data, {
+    onEachFeature: function (feature, layer) {
+        if (feature.properties && feature.properties.audio_url) {
+            layer.bindPopup(popup_template(feature.properties));
+        }
+        else if (feature.properties && feature.properties.popupContent) {
+            layer.bindPopup(feature.properties.popupContent);
+        }
+    }
+  }).addTo(mymap);
+  function elementText(selector) {
+    return W.document.querySelector(selector).innerText;
+  }
+}(window));
+</script>
